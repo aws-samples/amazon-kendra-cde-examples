@@ -36,11 +36,8 @@ public class App implements RequestHandler<Map<String,String>, String>
         Elements metaTags = doc.getElementsByTag("meta");
         
         for (Element metaTag : metaTags) {
-            String content = metaTag.attr("content");
-            String property = metaTag.attr("property");
-
-            if(property.equals("article:tag")) {
-                article_tags.add(content);
+            if("article:tag".equals(metaTag.attr("property"))) {
+                article_tags.add(metaTag.attr("content"));
             }
         }
 
@@ -53,32 +50,31 @@ public class App implements RequestHandler<Map<String,String>, String>
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(Regions.DEFAULT_REGION).build();
         
         LambdaLogger logger = context.getLogger();
-        event.get("");
         logger.log("Received event: " + event.toString());
 
         String s3Bucket = event.get("s3Bucket");
         String s3ObjectKey = event.get("s3ObjectKey");
-        //String metadata = event.get("metadata");     
-        HashMap<String, Object> dictionary = new HashMap<String, Object>();
+        //String metadata = event.get("metadata"); //this is here because its in the python example
+        Map<String, Object> dictionary = new HashMap<>();
 
         try {
             S3Object o = s3.getObject(s3Bucket, s3ObjectKey);
             S3ObjectInputStream s3is = o.getObjectContent();
 
-            String beforeCDE = new BufferedReader(
-                new InputStreamReader(s3is, StandardCharsets.UTF_8))
+            String beforeCDE = new BufferedReader(new InputStreamReader(s3is, StandardCharsets.UTF_8))
                 .lines()
                 .collect(Collectors.joining("\n"));
             s3is.close();
 
-            List<String> article_tags = getMetadataTags(beforeCDE);
-            String afterCDE = beforeCDE; //if you want to manipulate the file before writing it 
+            List<String> article_tags = getMetadataTags(beforeCDE); 
+            String afterCDE = beforeCDE.toString(); 
+            //you can manipulate afterCDE here.
             String new_key = "cde_output/" + s3ObjectKey;
             s3.putObject(s3Bucket, new_key, afterCDE);
 
-            HashMap<String, Object> stringListValue = new HashMap<String, Object>();
+            Map<String, Object> stringListValue = new HashMap<>();
             stringListValue.put("stringListValue", article_tags);
-            HashMap<String, Object> metaUL = new HashMap<String, Object>();
+            Map<String, Object> metaUL = new HashMap<>();
             metaUL.put("name", "ARTICLE_TAGS");
             metaUL.put("value", stringListValue);
             dictionary.put("version","v0");
