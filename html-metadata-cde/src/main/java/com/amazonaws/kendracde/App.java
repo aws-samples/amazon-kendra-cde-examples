@@ -58,6 +58,8 @@ public class App implements RequestHandler<Map<String,String>, String>
         Map<String, Object> dictionary = new HashMap<>();
 
         try {
+
+            logger.log("Starting download from s3...");
             S3Object o = s3.getObject(s3Bucket, s3ObjectKey);
             S3ObjectInputStream s3is = o.getObjectContent();
 
@@ -66,20 +68,26 @@ public class App implements RequestHandler<Map<String,String>, String>
                 .collect(Collectors.joining("\n"));
             s3is.close();
 
+            logger.log("Finished download. Starting Metatag scan...");
+
             List<String> article_tags = getMetadataTags(beforeCDE); 
+            logger.log("Finished metatag scan. Writing output file...");
+
             String afterCDE = beforeCDE.toString(); 
             //you can manipulate afterCDE here.
             String new_key = "cde_output/" + s3ObjectKey;
             s3.putObject(s3Bucket, new_key, afterCDE);
-
+            logger.log("Finished writing output file.");
             Map<String, Object> stringListValue = new HashMap<>();
             stringListValue.put("stringListValue", article_tags);
             Map<String, Object> metaUL = new HashMap<>();
             metaUL.put("name", "ARTICLE_TAGS");
             metaUL.put("value", stringListValue);
+            List<Map<String, Object>> metaUL_List = new ArrayList<>();
+            metaUL_List.add(metaUL);
             dictionary.put("version","v0");
-            dictionary.put("s3ObjectKey","v0"); 
-            dictionary.put("metadataUpdates",metaUL);
+            dictionary.put("s3ObjectKey",new_key); 
+            dictionary.put("metadataUpdates",metaUL_List);
         } catch (AmazonServiceException e) {
             logger.log(e.getErrorMessage());
             System.exit(1);
@@ -92,6 +100,7 @@ public class App implements RequestHandler<Map<String,String>, String>
         }
 
         String response = new JSONObject(dictionary).toString();
+        logger.log("Response:\n" + response);
         return response;
     }
 }
