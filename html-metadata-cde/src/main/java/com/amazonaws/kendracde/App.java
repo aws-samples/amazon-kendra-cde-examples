@@ -49,14 +49,12 @@ public class App implements RequestHandler<Map<String,Object>, Map<String, Objec
     @Override
     public Map<String, Object> handleRequest(Map<String,Object> event, Context context)
     {
-        final AmazonS3 s3 = AmazonS3ClientBuilder.standard().build(); // TODO: FIX THIS  withRegion(Regions.fromName(System.getenv("AWS_REGION")))
+        final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(System.getenv("AWS_REGION")).build();
         
         LambdaLogger logger = context.getLogger();
         logger.log("Received event: " + event.toString());
-
         String s3Bucket = (String)event.get("s3Bucket");
         String s3ObjectKey = (String)event.get("s3ObjectKey");
-        //String metadata = event.get("metadata"); //this is here because its in the python example
         Map<String, Object> dictionary = new HashMap<>();
 
         try {
