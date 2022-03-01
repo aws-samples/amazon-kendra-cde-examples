@@ -52,7 +52,6 @@ public class App implements RequestHandler<Map<String,Object>, Map<String, Objec
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard().withRegion(System.getenv("AWS_REGION")).build();
         
         LambdaLogger logger = context.getLogger();
-        logger.log("Received event: " + event.toString());
         String s3Bucket = (String)event.get("s3Bucket");
         String s3ObjectKey = (String)event.get("s3ObjectKey");
         Map<String, Object> dictionary = new HashMap<>();
@@ -99,8 +98,6 @@ public class App implements RequestHandler<Map<String,Object>, Map<String, Objec
             System.exit(1);
         }
 
-        String response = new JSONObject(dictionary).toString();
-        logger.log("Response:\n" + response);
         return dictionary;
     }
 }
