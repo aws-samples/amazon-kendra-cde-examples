@@ -57,7 +57,6 @@ public class App implements RequestHandler<Map<String,Object>, Map<String, Objec
         Map<String, Object> dictionary = new HashMap<>();
 
         try {
-
             logger.log("Starting download from s3...");
             S3Object o = s3.getObject(s3Bucket, s3ObjectKey);
             S3ObjectInputStream s3is = o.getObjectContent();
