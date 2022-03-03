@@ -2,6 +2,10 @@
 
 This repository contains example AWS Lambda functions that are meant to be used with Amazon Kendra Custom Document Enrichment.
 
+Learn more about how to use Custom Document Enrichment in the blog article
+[Enrich your content and metadata to enhance your search experience with custom document enrichment in Amazon Kendra
+](https://aws.amazon.com/blogs/machine-learning/enrich-your-content-and-metadata-to-enhance-your-search-experience-with-custom-document-enrichment-in-amazon-kendra/).
+
 ## Python Examples
 
 ### metaTagLambda.py
